@@ -15,7 +15,7 @@ jobs:
       VCPKG_INSTALLED_DIR: ${{ github.workspace }}\vcpkg_installed
       VCPKG_ROOT: ${{ github.workspace }}\vcpkg
       VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}\vcpkg-binary-cache
-      QT_VERSION: '6.6.1'
+      QT_VERSION: '6.8.1'
 
     steps:
       - name: Checkout repository
