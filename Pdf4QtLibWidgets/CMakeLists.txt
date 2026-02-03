@@ -71,6 +71,8 @@ add_library(Pdf4QtLibWidgets SHARED
     sources/pdfcertificatelisthelper.h
     sources/pdfcertificatelisthelper.cpp
     sources/pdfpagecontenteditorediteditemsettings.h sources/pdfpagecontenteditorediteditemsettings.cpp sources/pdfpagecontenteditorediteditemsettings.ui
+    sources/pdfglassmorphismwidget.h
+    sources/pdfglassmorphismwidget.cpp
 )
 
 include(GenerateExportHeader)

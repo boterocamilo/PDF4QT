@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.boterocamilo.PDF4QT</id>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+  
+  <name>PDF4QT</name>
+  <summary>Advanced PDF viewer and editor with modern glassmorphism UI</summary>
+  
+  <description>
+    <p>
+      PDF4QT is a comprehensive PDF viewer and editor featuring a modern glassmorphism user interface
+      with translucent, floating toolbars and smooth animations. It provides advanced PDF functionality
+      based on PDF Reference 2.0.
+    </p>
+    <p>Features include:</p>
+    <ul>
+      <li>Modern glassmorphism UI with floating, draggable toolbars</li>
+      <li>Automatic light/dark theme adaptation</li>
+      <li>Advanced document viewing and editing capabilities</li>
+      <li>Multithreading support for smooth performance</li>
+      <li>Encryption and signature validation</li>
+      <li>Color management system</li>
+      <li>Text layout analysis and text-to-speech</li>
+      <li>Form filling and annotation support</li>
+      <li>Document comparison and optimization tools</li>
+      <li>Audio book conversion</li>
+      <li>Command line tools</li>
+    </ul>
+  </description>
+  
+  <screenshots>
+    <screenshot type="default">
+      <caption>Main viewer window with glassmorphism toolbar</caption>
+      <image>https://raw.githubusercontent.com/boterocamilo/PDF4QT/master/assets/screenshot1.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Document editor with floating toolbar</caption>
+      <image>https://raw.githubusercontent.com/boterocamilo/PDF4QT/master/assets/screenshot2.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Dark mode with translucent UI elements</caption>
+      <image>https://raw.githubusercontent.com/boterocamilo/PDF4QT/master/assets/screenshot3.png</image>
+    </screenshot>
+  </screenshots>
+  
+  <url type="homepage">https://github.com/boterocamilo/PDF4QT</url>
+  <url type="bugtracker">https://github.com/boterocamilo/PDF4QT/issues</url>
+  <url type="help">https://github.com/boterocamilo/PDF4QT/wiki</url>
+  <url type="donation">https://github.com/sponsors/JakubMelka</url>
+  
+  <developer_name>Jakub Melka and Contributors</developer_name>
+  <update_contact>Mgr.Jakub.Melka@gmail.com</update_contact>
+  
+  <launchable type="desktop-id">io.github.boterocamilo.PDF4QT.desktop</launchable>
+  
+  <provides>
+    <binary>Pdf4QtViewer</binary>
+    <binary>Pdf4QtEditor</binary>
+    <binary>Pdf4QtDiff</binary>
+    <binary>Pdf4QtPageMaster</binary>
+    <binary>PdfTool</binary>
+  </provides>
+  
+  <categories>
+    <category>Office</category>
+    <category>Viewer</category>
+    <category>Graphics</category>
+  </categories>
+  
+  <keywords>
+    <keyword>PDF</keyword>
+    <keyword>viewer</keyword>
+    <keyword>editor</keyword>
+    <keyword>document</keyword>
+    <keyword>glassmorphism</keyword>
+  </keywords>
+  
+  <content_rating type="oars-1.1" />
+  
+  <releases>
+    <release version="1.6.0" date="2026-02-03">
+      <description>
+        <p>Major UI modernization release</p>
+        <ul>
+          <li>New glassmorphism UI with floating toolbars</li>
+          <li>Automatic theme adaptation (light/dark mode)</li>
+          <li>Draggable and customizable toolbars</li>
+          <li>Smooth animations and transitions</li>
+          <li>Auto-hide toolbar functionality</li>
+          <li>Improved performance and stability</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+</component>

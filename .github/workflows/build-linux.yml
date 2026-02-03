@@ -1,0 +1,142 @@
+name: Build Linux Packages
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-appimage:
+    runs-on: ubuntu-latest
+    
+    env:
+      VCPKG_OVERLAY_PORTS: ${{ github.workspace }}/pdf4qt/vcpkg/overlays/linux:${{ github.workspace }}/pdf4qt/vcpkg/overlays/general
+      VCPKG_INSTALLED_DIR: ${{ github.workspace }}/vcpkg_installed
+      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+      VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/.vcpkg-binary-cache
+      QT_VERSION: '6.6.1'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: pdf4qt
+
+      - name: Prepare vcpkg directories
+        run: |
+          mkdir -p "$VCPKG_DEFAULT_BINARY_CACHE"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            libcups2-dev \
+            libfontconfig1-dev \
+            libfuse2 \
+            file \
+            desktop-file-utils \
+            libglib2.0-bin
+
+      - name: Set up VCPKG
+        run: |
+          git clone --depth=1 https://github.com/microsoft/vcpkg.git
+          cd vcpkg
+          ./bootstrap-vcpkg.sh -disableMetrics
+          ./vcpkg integrate install
+
+      - name: Cache vcpkg dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ./vcpkg/downloads
+            ./vcpkg/packages
+            ./vcpkg_installed
+          key: ${{ runner.os }}-vcpkg-appimage-${{ hashFiles('**/vcpkg.json', '**/vcpkg-configuration.json') }}
+          restore-keys: |
+            ${{ runner.os }}-vcpkg-appimage-
+
+      - name: Install vcpkg dependencies
+        run: |
+          ./vcpkg install --x-manifest-root=$GITHUB_WORKSPACE/pdf4qt --x-install-root=$VCPKG_INSTALLED_DIR --clean-buildtrees-after-build --clean-packages-after-build
+        working-directory: vcpkg
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: 'linux'
+          target: 'desktop'
+          dir: '${{ github.workspace }}/qt/'
+          install-deps: 'true'
+          modules: 'qtspeech qtmultimedia'
+          cache: 'true'
+          cache-key-prefix: ${{ runner.os }}-qt-${{ env.QT_VERSION }}
+
+      - name: Configure CMake
+        working-directory: pdf4qt
+        run: |
+          cmake -B build -S . \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_VCPKG_BUILD_TYPE=Release \
+            -DPDF4QT_INSTALL_QT_DEPENDENCIES=1 \
+            -DPDF4QT_INSTALL_DEPENDENCIES=1 \
+            -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake \
+            -DCMAKE_INSTALL_PREFIX=/usr
+
+      - name: Build project
+        working-directory: pdf4qt
+        run: |
+          cmake --build build --target all release_translations --config Release --parallel
+          cmake --install build --prefix=AppDir
+
+      - name: Create AppImage
+        working-directory: pdf4qt
+        run: |
+          # Download linuxdeploy and Qt plugin
+          wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          wget https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
+          chmod +x linuxdeploy*.AppImage
+          
+          # Set up environment for linuxdeploy
+          export QML_SOURCES_PATHS=.
+          export QMAKE=$Qt6_DIR/bin/qmake
+          
+          # Create desktop file if not exists
+          mkdir -p AppDir/usr/share/applications
+          if [ ! -f AppDir/usr/share/applications/pdf4qt.desktop ]; then
+            cat > AppDir/usr/share/applications/pdf4qt.desktop << 'EOF'
+          [Desktop Entry]
+          Name=PDF4QT
+          Comment=PDF Viewer and Editor
+          Exec=Pdf4QtViewer
+          Icon=pdf4qt
+          Type=Application
+          Categories=Office;Viewer;
+          EOF
+          fi
+          
+          # Create AppImage
+          ./linuxdeploy-x86_64.AppImage --appdir AppDir --plugin qt --output appimage || true
+          
+          # Rename AppImage to standard format
+          if ls PDF4QT*.AppImage 1> /dev/null 2>&1; then
+            mv PDF4QT*.AppImage PDF4QT-Linux-x86_64.AppImage
+          fi
+
+      - name: Upload AppImage Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PDF4QT-Linux-x86_64-AppImage
+          path: pdf4qt/*.AppImage
+          retention-days: 30
+
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: pdf4qt/*.AppImage
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,135 @@
+name: Build macOS Installer
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-macos:
+    runs-on: macos-14  # Apple Silicon runner
+    
+    env:
+      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+      VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/.vcpkg-binary-cache
+      QT_VERSION: '6.6.1'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: pdf4qt
+
+      - name: Prepare vcpkg directories
+        run: |
+          mkdir -p "$VCPKG_DEFAULT_BINARY_CACHE"
+
+      - name: Set up VCPKG
+        run: |
+          git clone --depth=1 https://github.com/microsoft/vcpkg.git
+          cd vcpkg
+          ./bootstrap-vcpkg.sh -disableMetrics
+          ./vcpkg integrate install
+
+      - name: Cache vcpkg dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ./vcpkg/downloads
+            ./vcpkg/packages
+            ./vcpkg_installed
+          key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json', '**/vcpkg-configuration.json') }}
+          restore-keys: |
+            ${{ runner.os }}-vcpkg-
+
+      - name: Install vcpkg dependencies
+        run: |
+          ./vcpkg install --x-manifest-root=$GITHUB_WORKSPACE/pdf4qt --x-install-root=$GITHUB_WORKSPACE/vcpkg_installed --clean-buildtrees-after-build --clean-packages-after-build
+        working-directory: vcpkg
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: 'mac'
+          target: 'desktop'
+          dir: '${{ github.workspace }}/qt/'
+          install-deps: 'true'
+          modules: 'qtspeech qtmultimedia'
+          cache: 'true'
+          cache-key-prefix: ${{ runner.os }}-qt-${{ env.QT_VERSION }}
+
+      - name: Configure CMake
+        working-directory: pdf4qt
+        run: |
+          cmake -B build -S . \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
+            -DCMAKE_TOOLCHAIN_FILE="../vcpkg/scripts/buildsystems/vcpkg.cmake" \
+            -DPDF4QT_INSTALL_QT_DEPENDENCIES=ON \
+            -DPDF4QT_INSTALL_DEPENDENCIES=ON \
+            -DCMAKE_INSTALL_PREFIX=./install
+
+      - name: Build project
+        working-directory: pdf4qt
+        run: |
+          cmake --build build --target release_translations --config Release --parallel
+          cmake --build build --config Release --parallel
+          cmake --install build --config Release
+
+      - name: Create DMG background image
+        run: |
+          mkdir -p pdf4qt/assets
+          # Create a simple background using ImageMagick or similar
+          # For now, we'll use a solid color gradient
+          cat > pdf4qt/assets/dmg-background.png.placeholder << 'EOF'
+          # Placeholder for DMG background
+          # In production, this would be a proper PNG image (800x450px)
+          EOF
+
+      - name: Create macOS DMG
+        working-directory: pdf4qt
+        run: |
+          # Install create-dmg tool
+          brew install create-dmg
+          
+          # Create Applications symlink
+          mkdir -p build/dmg
+          cp -R build/install/* build/dmg/
+          ln -s /Applications build/dmg/Applications
+          
+          # Create DMG with custom background
+          create-dmg \
+            --volname "PDF4QT" \
+            --window-pos 200 120 \
+            --window-size 800 450 \
+            --icon-size 100 \
+            --icon "PDF4QT.app" 200 190 \
+            --hide-extension "PDF4QT.app" \
+            --app-drop-link 600 185 \
+            --no-internet-enable \
+            "PDF4QT-macOS-Universal.dmg" \
+            "build/dmg/" || true
+          
+          # Fallback: Create simple DMG if create-dmg fails
+          if [ ! -f "PDF4QT-macOS-Universal.dmg" ]; then
+            hdiutil create -volname "PDF4QT" -srcfolder build/dmg -ov -format UDZO "PDF4QT-macOS-Universal.dmg"
+          fi
+
+      - name: Upload DMG Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PDF4QT-macOS-Universal-DMG
+          path: pdf4qt/*.dmg
+          retention-days: 30
+
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: pdf4qt/*.dmg
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

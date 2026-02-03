@@ -97,7 +97,8 @@ PDFViewerMainWindow::PDFViewerMainWindow(QWidget* parent) :
     m_progressTaskbarIndicator(new PDFWinTaskBarProgress(this)),
     m_progressBarOnStatusBar(nullptr),
     m_progressBarLeftLabelOnStatusBar(nullptr),
-    m_isChangingProgressStep(false)
+    m_isChangingProgressStep(false),
+    m_floatingToolbar(nullptr)
 {
     ui->setupUi(this);
 
@@ -459,6 +460,20 @@ void PDFViewerMainWindow::showEvent(QShowEvent* event)
 {
     QMainWindow::showEvent(event);
     m_progressTaskbarIndicator->setWindow(windowHandle());
+    
+    // Initialize floating toolbar if enabled
+    if (!m_floatingToolbar && m_programController->getSettings()->isFloatingToolbarEnabled())
+    {
+        m_floatingToolbar = new PDFGlassmorphismToolbar(this);
+        m_floatingToolbar->setToolbar(ui->mainToolBar);
+        m_floatingToolbar->setPosition(static_cast<PDFGlassmorphismToolbar::Position>(
+            m_programController->getSettings()->getToolbarPosition()));
+        m_floatingToolbar->setAutoHideEnabled(m_programController->getSettings()->isAutoHideToolbarEnabled());
+        m_floatingToolbar->showAnimated();
+        
+        // Hide the original toolbar when using floating version
+        ui->mainToolBar->hide();
+    }
 }
 
 void PDFViewerMainWindow::dragEnterEvent(QDragEnterEvent* event)

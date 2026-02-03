@@ -1,0 +1,113 @@
+{
+    "app-id": "io.github.boterocamilo.PDF4QT",
+    "runtime": "org.kde.Platform",
+    "runtime-version": "6.9",
+    "sdk": "org.kde.Sdk",
+    "command": "Pdf4QtViewer",
+    "finish-args": [
+        "--socket=fallback-x11",
+        "--socket=wayland",
+        "--device=dri",
+        "--share=ipc",
+        "--filesystem=host",
+        "--filesystem=xdg-documents",
+        "--talk-name=org.freedesktop.Notifications"
+    ],
+    "cleanup": [
+        "/include",
+        "/lib/pkgconfig",
+        "/lib/*.la",
+        "/lib/*.a",
+        "/share/man"
+    ],
+    "build-options": {
+        "env": {
+            "PKG_CONFIG_PATH": "/app/lib64/pkgconfig:/app/lib/pkgconfig"
+        }
+    },
+    "modules": [
+        {
+            "name": "tbb",
+            "buildsystem": "cmake-ninja",
+            "builddir": true,
+            "config-opts": [
+                "-DCMAKE_BUILD_TYPE=Release",
+                "-DTBB_TEST=OFF",
+                "-DTBB_EXAMPLES=OFF"
+            ],
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://github.com/uxlfoundation/oneTBB.git",
+                    "commit": "d3b0a80d02501b2304de6afb940465f465482a6b"
+                }
+            ]
+        },
+        {
+            "name": "lcms2",
+            "buildsystem": "cmake-ninja",
+            "builddir": true,
+            "config-opts": [
+                "-DCMAKE_BUILD_TYPE=Release"
+            ],
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://github.com/mm2/Little-CMS.git",
+                    "tag": "lcms2.16"
+                }
+            ]
+        },
+        {
+            "name": "openjpeg",
+            "buildsystem": "cmake-ninja",
+            "builddir": true,
+            "config-opts": [
+                "-DCMAKE_BUILD_TYPE=Release"
+            ],
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://github.com/uclouvain/openjpeg.git",
+                    "tag": "v2.5.0"
+                }
+            ]
+        },
+        {
+            "name": "blend2d",
+            "buildsystem": "cmake-ninja",
+            "builddir": true,
+            "config-opts": [
+                "-DCMAKE_BUILD_TYPE=Release",
+                "-DBLEND2D_STATIC=OFF"
+            ],
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://github.com/blend2d/blend2d.git",
+                    "tag": "0.11.2"
+                }
+            ]
+        },
+        {
+            "name": "pdf4qt",
+            "buildsystem": "cmake-ninja",
+            "builddir": true,
+            "config-opts": [
+                "-DCMAKE_BUILD_TYPE=Release",
+                "-DPDF4QT_INSTALL_QT_DEPENDENCIES=OFF",
+                "-DPDF4QT_INSTALL_DEPENDENCIES=OFF"
+            ],
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://github.com/boterocamilo/PDF4QT.git",
+                    "branch": "master"
+                }
+            ],
+            "post-install": [
+                "install -Dm644 Desktop/io.github.boterocamilo.PDF4QT.metainfo.xml /app/share/metainfo/io.github.boterocamilo.PDF4QT.metainfo.xml"
+            ]
+        }
+    ]
+}

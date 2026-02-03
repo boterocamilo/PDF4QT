@@ -41,6 +41,7 @@
 #include "pdfplugin.h"
 #include "pdfprogramcontroller.h"
 #include "pdfwintaskbarprogress.h"
+#include "pdfglassmorphismwidget.h"
 
 #include <QFuture>
 #include <QTreeView>
@@ -129,6 +130,7 @@ private:
     QProgressBar* m_progressBarOnStatusBar;
     QLabel* m_progressBarLeftLabelOnStatusBar;
     bool m_isChangingProgressStep;
+    PDFGlassmorphismToolbar* m_floatingToolbar;
 };
 
 }   // namespace pdfviewer

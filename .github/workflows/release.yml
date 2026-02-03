@@ -1,0 +1,141 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v1.6.0)'
+        required: true
+        default: 'v1.6.0'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      version: ${{ steps.get_version.outputs.version }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get version
+        id: get_version
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          cat > release_notes.md << 'EOF'
+          ## 🎉 PDF4QT Release ${{ steps.get_version.outputs.version }}
+          
+          ### ✨ New Features
+          - **Glassmorphism UI**: Modern, translucent floating toolbars with blur effects
+          - **Auto-hide Toolbars**: Optional auto-hide functionality for distraction-free viewing
+          - **Draggable Toolbars**: Repositionable floating toolbars
+          - **Theme Adaptation**: Automatic light/dark mode support
+          
+          ### 🏗️ Platform Support
+          - **Windows**: MSI installer with MSVC runtime
+          - **macOS**: Universal DMG (Apple Silicon + Intel)
+          - **Linux**: AppImage for broad compatibility
+          
+          ### 📦 Downloads
+          Choose the package for your platform:
+          - **Windows**: `PDF4QT-Windows-x64.msi` or ZIP archive
+          - **macOS**: `PDF4QT-macOS-Universal.dmg`
+          - **Linux**: `PDF4QT-Linux-x86_64.AppImage`
+          
+          ### 🔧 Installation
+          
+          **Windows:**
+          1. Download the MSI installer
+          2. Run the installer and follow the prompts
+          3. Launch PDF4QT from the Start Menu
+          
+          **macOS:**
+          1. Download the DMG file
+          2. Open the DMG and drag PDF4QT to Applications
+          3. Launch from Applications folder
+          
+          **Linux:**
+          1. Download the AppImage
+          2. Make it executable: `chmod +x PDF4QT-Linux-x86_64.AppImage`
+          3. Run: `./PDF4QT-Linux-x86_64.AppImage`
+          
+          ### 📝 Changelog
+          - Enhanced UI with modern glassmorphism design
+          - Improved toolbar customization options
+          - Better theme adaptation
+          - Performance improvements
+          - Bug fixes and stability improvements
+          
+          ### 🙏 Acknowledgments
+          Thank you to all contributors and users for your support!
+          
+          ---
+          
+          **Full Changelog**: https://github.com/${{ github.repository }}/compare/...
+          
+          **Sponsor this project**: https://github.com/sponsors/JakubMelka
+          EOF
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.get_version.outputs.version }}
+          name: PDF4QT ${{ steps.get_version.outputs.version }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-and-upload:
+    needs: create-release
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            name: Windows
+            artifact: PDF4QT-Windows-x64-MSI
+          - os: macos-14
+            name: macOS
+            artifact: PDF4QT-macOS-Universal-DMG
+          - os: ubuntu-latest
+            name: Linux
+            artifact: PDF4QT-Linux-x86_64-AppImage
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      - name: Trigger platform-specific build
+        run: |
+          echo "Platform-specific builds should be triggered by build-windows.yml, build-macos.yml, and build-linux.yml"
+          echo "This job serves as a placeholder for coordinating releases"
+
+  finalize-release:
+    needs: [create-release, build-and-upload]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Update release as final
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.create-release.outputs.version }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
