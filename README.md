@@ -8,17 +8,61 @@
 
 **https://jakubmelka.github.io/**
 
-This software is consisting of PDF rendering library, and several
-applications, such as advanced document viewer, command line tool,
-and document page manipulator application. Software is implementing PDF
-functionality based on PDF Reference 2.0. It is written and maintained
-by Jakub Melka.
+![PDF4QT Banner](assets/banner.png)
 
-*Software works on Microsoft Windows / Linux.*
+---
+
+## 🌟 Modern PDF Viewer & Editor with Glassmorphism UI
+
+PDF4QT is a comprehensive PDF rendering library and suite of applications featuring a **modern glassmorphism user interface** with translucent, floating toolbars and smooth animations. Built on PDF Reference 2.0, it provides advanced PDF functionality with a beautiful, Apple-style interface.
+
+*Software works on Microsoft Windows / macOS / Linux.*
 
 Software is provided without any warranty of any kind.
 
 Should you find this software beneficial, your support would be greatly appreciated [:heart: Sponsor](https://github.com/sponsors/JakubMelka)!
+
+---
+
+## 📥 Downloads
+
+Get the latest release for your platform:
+
+| Platform | Download | Notes |
+|----------|----------|-------|
+| **Windows** | [Download MSI](https://github.com/boterocamilo/PDF4QT/releases/latest) | Includes MSVC runtime |
+| **macOS** | [Download DMG](https://github.com/boterocamilo/PDF4QT/releases/latest) | Universal binary (Intel + Apple Silicon) |
+| **Linux** | [Download AppImage](https://github.com/boterocamilo/PDF4QT/releases/latest) | Works on most distributions |
+| **Linux (Flatpak)** | [Get on Flathub](https://flathub.org/apps/io.github.JakubMelka.Pdf4qt) | Sandboxed installation |
+
+---
+
+## ✨ New in v1.6.0: Glassmorphism UI
+
+<table>
+<tr>
+<td width="50%">
+
+### 🎨 Modern Design
+- **Floating Toolbars**: Translucent, draggable toolbars with blur effects
+- **Auto-hide Mode**: Optional 3-second idle timeout for distraction-free viewing
+- **Smooth Animations**: 300ms fade effects with cubic easing
+- **Rounded Corners**: 12px radius for modern aesthetics
+
+</td>
+<td width="50%">
+
+### 🌓 Theme Adaptation
+- **Automatic Light/Dark**: Follows system theme preferences
+- **Adaptive Colors**: Background adjusts to environment
+- **Semi-transparent**: rgba(255,255,255,0.7) light / rgba(40,40,45,0.8) dark
+- **Subtle Shadows**: 8px blur for depth
+
+</td>
+</tr>
+</table>
+
+---
 
 ## 1. ACKNOWLEDGEMENTS
 
@@ -39,8 +83,16 @@ This software also uses several third-party libraries, and users must comply wit
 
 ## 3. FEATURES
 
-Software have following features (the list is not complete):
+Software has the following features:
 
+### 🎨 UI & User Experience
+- [x] **Modern glassmorphism UI** with floating, translucent toolbars
+- [x] **Draggable toolbars** with customizable positioning
+- [x] **Auto-hide functionality** for distraction-free viewing
+- [x] **Automatic theme adaptation** (light/dark mode)
+- [x] **Smooth animations** with 60fps target
+
+### 📄 PDF Capabilities
 - [x] multithreading support
 - [x] encryption
 - [x] color management
