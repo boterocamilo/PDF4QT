@@ -123,6 +123,11 @@ public:
 
         // Language
         pdf::PDFApplicationTranslator::ELanguage m_language;
+
+        // Floating toolbar settings
+        bool m_floatingToolbarEnabled;
+        int m_toolbarPosition;
+        bool m_autoHideToolbarEnabled;
     };
 
     const Settings& getSettings() const { return m_settings; }
@@ -165,6 +170,16 @@ public:
     void setColorScheme(ColorScheme colorScheme);
 
     static ColorScheme getColorSchemeStatic();
+
+    // Floating toolbar settings
+    bool isFloatingToolbarEnabled() const { return m_settings.m_floatingToolbarEnabled; }
+    void setFloatingToolbarEnabled(bool enabled);
+
+    int getToolbarPosition() const { return m_settings.m_toolbarPosition; }
+    void setToolbarPosition(int position);
+
+    bool isAutoHideToolbarEnabled() const { return m_settings.m_autoHideToolbarEnabled; }
+    void setAutoHideToolbarEnabled(bool enabled);
 
 signals:
     void settingsChanged();

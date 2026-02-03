@@ -118,6 +118,12 @@ void PDFViewerSettings::readSettings(QSettings& settings, const pdf::PDFCMSSetti
     m_settings.m_colorScheme = static_cast<ColorScheme>(settings.value("colorScheme", int(defaultSettings.m_colorScheme)).toInt());
     settings.endGroup();
 
+    settings.beginGroup("FloatingToolbar");
+    m_settings.m_floatingToolbarEnabled = settings.value("floatingToolbarEnabled", defaultSettings.m_floatingToolbarEnabled).toBool();
+    m_settings.m_toolbarPosition = settings.value("toolbarPosition", defaultSettings.m_toolbarPosition).toInt();
+    m_settings.m_autoHideToolbarEnabled = settings.value("autoHideToolbarEnabled", defaultSettings.m_autoHideToolbarEnabled).toBool();
+    settings.endGroup();
+
     // Language
     m_settings.m_language = pdf::PDFApplicationTranslator::loadSettings(settings);
 
@@ -197,6 +203,12 @@ void PDFViewerSettings::writeSettings(QSettings& settings)
 
     settings.beginGroup("ColorScheme");
     settings.setValue("colorScheme", int(m_settings.m_colorScheme));
+    settings.endGroup();
+
+    settings.beginGroup("FloatingToolbar");
+    settings.setValue("floatingToolbarEnabled", m_settings.m_floatingToolbarEnabled);
+    settings.setValue("toolbarPosition", m_settings.m_toolbarPosition);
+    settings.setValue("autoHideToolbarEnabled", m_settings.m_autoHideToolbarEnabled);
     settings.endGroup();
 
     pdf::PDFApplicationTranslator::saveSettings(settings, m_settings.m_language);
@@ -295,6 +307,33 @@ PDFViewerSettings::ColorScheme PDFViewerSettings::getColorScheme() const
     return m_settings.m_colorScheme;
 }
 
+void PDFViewerSettings::setFloatingToolbarEnabled(bool enabled)
+{
+    if (m_settings.m_floatingToolbarEnabled != enabled)
+    {
+        m_settings.m_floatingToolbarEnabled = enabled;
+        Q_EMIT settingsChanged();
+    }
+}
+
+void PDFViewerSettings::setToolbarPosition(int position)
+{
+    if (m_settings.m_toolbarPosition != position)
+    {
+        m_settings.m_toolbarPosition = position;
+        Q_EMIT settingsChanged();
+    }
+}
+
+void PDFViewerSettings::setAutoHideToolbarEnabled(bool enabled)
+{
+    if (m_settings.m_autoHideToolbarEnabled != enabled)
+    {
+        m_settings.m_autoHideToolbarEnabled = enabled;
+        Q_EMIT settingsChanged();
+    }
+}
+
 PDFViewerSettings::Settings::Settings() :
     m_features(pdf::PDFRenderer::getDefaultFeatures()),
     m_rendererEngine(pdf::RendererEngine::Blend2D_MultiThread),
@@ -325,7 +364,10 @@ PDFViewerSettings::Settings::Settings() :
     m_autoGenerateBookmarks(true),
     m_colorScheme(AutoScheme),
     m_sidebarButtonIconSize(SidebarButtonIconSizeLarge),
-    m_language(pdf::PDFApplicationTranslator::E_LANGUAGE_AUTOMATIC_SELECTION)
+    m_language(pdf::PDFApplicationTranslator::E_LANGUAGE_AUTOMATIC_SELECTION),
+    m_floatingToolbarEnabled(false),
+    m_toolbarPosition(0), // TopCenter
+    m_autoHideToolbarEnabled(false)
 {
 
 }
