@@ -188,7 +188,7 @@ if(Qt6_VERSION VERSION_GREATER_EQUAL "6.9.0")
                         QM_OUTPUT_DIRECTORY ${PDF4QT_TRANSLATION_QM_OUTPUT_DIRECTORY}
                         QM_FILES_OUTPUT_VARIABLE pdf4qt_qm_files)
 else()
-    # For Qt 6.8 and earlier, use qt_add_translations without output directory arguments
+    # For Qt versions before 6.9.0, use qt_add_translations without output directory arguments
     qt_add_translations(TARGETS Pdf4QtEditor Pdf4QtViewer Pdf4QtPageMaster Pdf4QtDiff PdfTool
                         SOURCE_TARGETS ${i18n_targets}
                         QM_FILES_OUTPUT_VARIABLE pdf4qt_qm_files)
@@ -208,7 +208,7 @@ if(NOT PDF4QT_BUILD_ONLY_CORE_LIBRARY)
                 FILES_MATCHING
                 PATTERN *.qm)
     else()
-        # Qt 6.8 and earlier: install files directly from the list
+        # Qt versions before 6.9.0: install files directly from the list
         if(pdf4qt_qm_files)
             install(FILES ${pdf4qt_qm_files}
                     DESTINATION ${PDF4QT_INSTALL_BIN_DIR}/translations)
