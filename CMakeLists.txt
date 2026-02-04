@@ -180,11 +180,19 @@ set(PDF4QT_TRANSLATION_QM_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PDF4QT_INSTALL_
 message("PDF4QT_TRANSLATION_TS_OUTPUT_DIRECTORY" ${PDF4QT_TRANSLATION_TS_OUTPUT_DIRECTORY})
 message("PDF4QT_TRANSLATION_QM_OUTPUT_DIRECTORY" ${PDF4QT_TRANSLATION_QM_OUTPUT_DIRECTORY})
 
-qt_add_translations(TARGETS Pdf4QtEditor Pdf4QtViewer Pdf4QtPageMaster Pdf4QtDiff PdfTool
-                    SOURCE_TARGETS ${i18n_targets}
-                    TS_OUTPUT_DIRECTORY ${PDF4QT_TRANSLATION_TS_OUTPUT_DIRECTORY}
-                    QM_OUTPUT_DIRECTORY ${PDF4QT_TRANSLATION_QM_OUTPUT_DIRECTORY}
-                    QM_FILES_OUTPUT_VARIABLE pdf4qt_qm_files)
+# Qt 6.9+ supports TS_OUTPUT_DIRECTORY and QM_OUTPUT_DIRECTORY arguments
+if(Qt6_VERSION VERSION_GREATER_EQUAL "6.9.0")
+    qt_add_translations(TARGETS Pdf4QtEditor Pdf4QtViewer Pdf4QtPageMaster Pdf4QtDiff PdfTool
+                        SOURCE_TARGETS ${i18n_targets}
+                        TS_OUTPUT_DIRECTORY ${PDF4QT_TRANSLATION_TS_OUTPUT_DIRECTORY}
+                        QM_OUTPUT_DIRECTORY ${PDF4QT_TRANSLATION_QM_OUTPUT_DIRECTORY}
+                        QM_FILES_OUTPUT_VARIABLE pdf4qt_qm_files)
+else()
+    # For Qt 6.8 and earlier, use qt_add_translations without output directory arguments
+    qt_add_translations(TARGETS Pdf4QtEditor Pdf4QtViewer Pdf4QtPageMaster Pdf4QtDiff PdfTool
+                        SOURCE_TARGETS ${i18n_targets}
+                        QM_FILES_OUTPUT_VARIABLE pdf4qt_qm_files)
+endif()
 
 message("CMAKE_PREFIX_PATH = " ${CMAKE_PREFIX_PATH})
 message("CMAKE_TOOLCHAIN_FILE = " ${CMAKE_TOOLCHAIN_FILE})
@@ -192,10 +200,20 @@ message("CMAKE_TOOLCHAIN_FILE = " ${CMAKE_TOOLCHAIN_FILE})
 configure_file(version.txt.in version.txt)
 
 if(NOT PDF4QT_BUILD_ONLY_CORE_LIBRARY)
-    install(DIRECTORY ${PDF4QT_TRANSLATION_QM_OUTPUT_DIRECTORY}
-            RUNTIME DESTINATION ${PDF4QT_INSTALL_BIN_DIR}
-            FILES_MATCHING
-            PATTERN *.qm)
+    # Install translation files
+    if(Qt6_VERSION VERSION_GREATER_EQUAL "6.9.0")
+        # Qt 6.9+ uses QM_OUTPUT_DIRECTORY, install the directory
+        install(DIRECTORY ${PDF4QT_TRANSLATION_QM_OUTPUT_DIRECTORY}
+                RUNTIME DESTINATION ${PDF4QT_INSTALL_BIN_DIR}
+                FILES_MATCHING
+                PATTERN *.qm)
+    else()
+        # Qt 6.8 and earlier: install files directly from the list
+        if(pdf4qt_qm_files)
+            install(FILES ${pdf4qt_qm_files}
+                    DESTINATION ${PDF4QT_INSTALL_BIN_DIR}/translations)
+        endif()
+    endif()
 
     if(WIN32)
         install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Desktop/44x44/
