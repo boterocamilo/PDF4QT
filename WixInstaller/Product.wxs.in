@@ -3,7 +3,7 @@
   <?define MyInstallDir="${WIX_INSTALL_PREFIX}" ?>
 
   <Product Id="*" Name="PDF4QT" Language="1033" Version="${PDF4QT_VERSION}" Manufacturer="Jakub Melka" UpgradeCode="26336d8a-b2e7-44fc-9a73-68aa99900c7a">
-    <Package Id="*" InstallerVersion="200" Compressed="yes" InstallScope="perMachine" Manufacturer="Jakub Melka" Keywords="pdf,editor,viewer" />
+    <Package Id="*" InstallerVersion="200" Compressed="yes" InstallScope="perMachine" Manufacturer="Jakub Melka" Keywords="pdf,editor,viewer" Platform="x64" />
 
     <MajorUpgrade DowngradeErrorMessage="A newer version of PDF4QT is already installed." />
     <MediaTemplate EmbedCab="yes" />
@@ -40,7 +40,7 @@
 
   <Fragment>
     <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="ProgramFilesFolder">
+      <Directory Id="ProgramFiles64Folder">
         <Directory Id="INSTALLFOLDER" Name="PDF4QT" />
       </Directory>
       <Directory Id="DesktopFolder" Name="Desktop"/>
